@@ -11,6 +11,10 @@ backend/dist/
 .env
 backend/.env
 
+# Kubernetes secrets (contain real credentials locally)
+k8s/backend/secret.yaml
+k8s/postgres/secret.yaml
+
 # Angular cache
 frontend/.angular/
 

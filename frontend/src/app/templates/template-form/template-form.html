@@ -1,0 +1,96 @@
+<div class="tform">
+  <div class="tform__header">
+    <a routerLink="/templates" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Templates
+    </a>
+    <h1 class="tform__title">{{ isEdit() ? 'Edit Template' : 'New Template' }}</h1>
+  </div>
+
+  @if (error()) {
+    <p class="tform__error">{{ error() }}</p>
+  }
+
+  <div class="tform__body">
+    <section class="form-section">
+      <label class="field">
+        <span class="field__label">Name <span aria-hidden="true">*</span></span>
+        <input class="field__input" type="text" [(ngModel)]="name" name="name"
+          placeholder="e.g. Push Day" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span class="field__label">Description</span>
+        <textarea class="field__input field__input--textarea" [(ngModel)]="description"
+          name="description" placeholder="Optional description" rows="2"></textarea>
+      </label>
+    </section>
+
+    <section class="form-section">
+      <h2 class="form-section__title">Exercises</h2>
+
+      @if (rows().length > 0) {
+        <div class="exercise-rows">
+          @for (row of rows(); track row.exerciseId; let i = $index; let last = $last) {
+            <div class="exercise-row">
+              <span class="exercise-row__order">{{ i + 1 }}</span>
+              <div class="exercise-row__info">
+                <span class="exercise-row__name">{{ row.exerciseName }}</span>
+                <span class="exercise-row__group">{{ muscleGroupLabels[row.muscleGroup] }}</span>
+              </div>
+              <div class="exercise-row__defaults">
+                <label class="mini-field">
+                  <span>Sets</span>
+                  <input type="number" min="1" max="99" [(ngModel)]="row.defaultSets" [name]="'sets_' + i" />
+                </label>
+                <label class="mini-field">
+                  <span>Reps</span>
+                  <input type="number" min="1" max="999" [(ngModel)]="row.defaultReps" [name]="'reps_' + i" />
+                </label>
+                <label class="mini-field">
+                  <span>kg</span>
+                  <input type="number" min="0" step="0.5" [(ngModel)]="row.defaultWeight" [name]="'weight_' + i" placeholder="—" />
+                </label>
+              </div>
+              <div class="exercise-row__controls">
+                <button type="button" class="icon-btn" (click)="moveUp(i)" [disabled]="i === 0" aria-label="Move up">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                </button>
+                <button type="button" class="icon-btn" (click)="moveDown(i)" [disabled]="last" aria-label="Move down">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <button type="button" class="icon-btn icon-btn--danger" (click)="removeRow(i)" aria-label="Remove">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="form-section__empty">No exercises added yet.</p>
+      }
+
+      <div class="add-exercise">
+        <select class="field__input" [(ngModel)]="selectedExerciseId" name="exercisePicker">
+          <option value="">— Select exercise to add —</option>
+          @for (ex of availableExercises(); track ex.id) {
+            <option [value]="ex.id" [disabled]="usedIds().has(ex.id)">
+              {{ ex.name }} ({{ muscleGroupLabels[ex.muscleGroup] }})
+            </option>
+          }
+        </select>
+        <button type="button" class="btn btn--secondary" (click)="addExercise()" [disabled]="!selectedExerciseId">
+          Add
+        </button>
+      </div>
+    </section>
+
+    <div class="tform__actions">
+      <a routerLink="/templates" class="btn btn--ghost">Cancel</a>
+      <button class="btn btn--primary" (click)="save()" [disabled]="!name.trim() || saving()">
+        {{ saving() ? 'Saving…' : (isEdit() ? 'Save Changes' : 'Create Template') }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="templates">
+  <div class="templates__header">
+    <h1 class="templates__title">Workout Templates</h1>
+    @if (auth.isAdmin()) {
+      <a routerLink="/templates/new" class="btn btn--primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Template
+      </a>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="templates__error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="templates__loading">Loading templates…</p>
+  } @else if (templates().length === 0) {
+    <p class="templates__empty">No templates yet. @if (auth.isAdmin()) { Create one to get started. }</p>
+  } @else {
+    <div class="template-grid">
+      @for (t of templates(); track t.id) {
+        <div class="template-card">
+          <div class="template-card__body">
+            <h2 class="template-card__name">{{ t.name }}</h2>
+            @if (t.description) {
+              <p class="template-card__desc">{{ t.description }}</p>
+            }
+            <p class="template-card__count">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 4v16M18 4v16M3 8h18M3 16h18"/>
+              </svg>
+              {{ t._count?.exercises }} exercise{{ t._count?.exercises === 1 ? '' : 's' }}
+            </p>
+          </div>
+          @if (auth.isAdmin()) {
+            <div class="template-card__actions">
+              <a [routerLink]="['/templates', t.id, 'edit']" class="btn btn--ghost btn--sm">Edit</a>
+              <button class="btn btn--danger btn--sm" (click)="delete(t)">Delete</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,29 @@
+# Requires an nginx Ingress controller in your cluster.
+# Docker Desktop: enable Kubernetes and install ingress-nginx.
+# minikube: run `minikube addons enable ingress`
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workout-tracker-ingress
+  namespace: workout-tracker
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Route /api/* to the backend (backend handles all /api routes)
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 3000
+          # Route everything else to the frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

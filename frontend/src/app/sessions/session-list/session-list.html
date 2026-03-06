@@ -1,0 +1,54 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">Workouts</h1>
+    <a routerLink="/sessions/new" class="btn btn--primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Start Workout
+    </a>
+  </div>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state-msg">Loading…</p>
+  } @else if (sessions().length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 4v16M18 4v16M3 8h18M3 16h18"/>
+      </svg>
+      <p>No workouts yet.</p>
+      <a routerLink="/sessions/new" class="btn btn--primary">Start your first workout</a>
+    </div>
+  } @else {
+    <div class="session-list">
+      @for (s of sessions(); track s.id) {
+        <a [routerLink]="['/sessions', s.id]" class="session-card">
+          <div class="session-card__main">
+            <span class="session-card__name">{{ s.name }}</span>
+            <span class="session-card__date">{{ formatDate(s.startedAt) }}</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__exercises">
+              {{ s._count?.exercises ?? 0 }} exercise{{ (s._count?.exercises ?? 0) !== 1 ? 's' : '' }}
+            </span>
+            <span class="session-card__duration">{{ formatDuration(s.startedAt, s.completedAt) }}</span>
+            @if (s.completedAt) {
+              <span class="badge badge--done">Done</span>
+            } @else {
+              <span class="badge badge--active">Active</span>
+            }
+          </div>
+          <button class="icon-btn icon-btn--danger" (click)="delete(s); $event.preventDefault()" title="Delete session">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </a>
+      }
+    </div>
+  }
+</div>

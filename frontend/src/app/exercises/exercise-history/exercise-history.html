@@ -1,0 +1,112 @@
+@if (loading()) {
+  <div class="state-msg">Loading…</div>
+} @else if (error()) {
+  <div class="state-msg state-msg--error">{{ error() }}</div>
+} @else if (data()) {
+  <div class="page-container">
+    <!-- Header -->
+    <div class="page-header">
+      <a routerLink="/exercises" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Exercises
+      </a>
+      <div class="exercise-meta">
+        <h1 class="exercise-name">{{ data()!.exercise.name }}</h1>
+        <span class="exercise-muscle">{{ muscleLabel(data()!.exercise.muscleGroup) }}</span>
+      </div>
+    </div>
+
+    <!-- Personal record -->
+    @if (data()!.personalRecord) {
+      <div class="pr-card">
+        <span class="pr-card__icon">🏆</span>
+        <div class="pr-card__info">
+          <span class="pr-card__label">Personal Record</span>
+          <span class="pr-card__value">{{ data()!.personalRecord!.weightKg }} kg × {{ data()!.personalRecord!.reps }} reps</span>
+        </div>
+        <span class="pr-card__date">{{ formatDate(data()!.personalRecord!.date) }}</span>
+      </div>
+    }
+
+    <!-- Progress chart -->
+    @if (data()!.sessions.length > 1) {
+      <section class="section">
+        <h2 class="section-title">Max weight per session</h2>
+        <div class="progress-chart">
+          @for (s of data()!.sessions.slice().reverse(); track s.sessionId) {
+            <div class="progress-chart__row">
+              <span class="progress-chart__date">{{ formatDate(s.date) }}</span>
+              <div class="progress-chart__track">
+                <div class="progress-chart__bar" [style.width.%]="barWidth(s)"></div>
+              </div>
+              <span class="progress-chart__value">{{ s.maxWeightKg }} kg</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Session history -->
+    @if (data()!.sessions.length === 0) {
+      <div class="empty-state">
+        <p>No completed sessions with this exercise yet.</p>
+      </div>
+    } @else {
+      <section class="section">
+        <h2 class="section-title">Session history</h2>
+        <div class="history-list">
+          @for (s of data()!.sessions; track s.sessionId) {
+            <div class="history-card">
+              <button class="history-card__header" (click)="toggleSession(s.sessionId)">
+                <div class="history-card__info">
+                  <span class="history-card__name">{{ s.sessionName }}</span>
+                  <span class="history-card__date">{{ formatDate(s.date) }}</span>
+                </div>
+                <div class="history-card__summary">
+                  <span>{{ s.sets.length }} set{{ s.sets.length !== 1 ? 's' : '' }}</span>
+                  <span class="history-card__maxweight">{{ s.maxWeightKg }} kg max</span>
+                </div>
+                <svg
+                  class="history-card__chevron"
+                  [class.history-card__chevron--open]="isExpanded(s.sessionId)"
+                  xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+
+              @if (isExpanded(s.sessionId)) {
+                <table class="sets-table">
+                  <thead>
+                    <tr>
+                      <th>Set</th>
+                      <th>Reps</th>
+                      <th>Weight (kg)</th>
+                      <th class="text-right">Volume</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (set of s.sets; track set.setNumber) {
+                      <tr>
+                        <td>{{ set.setNumber }}</td>
+                        <td>{{ set.reps }}</td>
+                        <td>{{ set.weightKg }}</td>
+                        <td class="text-right text-muted">{{ set.reps * set.weightKg }} kg</td>
+                      </tr>
+                    }
+                    <tr class="sets-table__total">
+                      <td colspan="3">Total volume</td>
+                      <td class="text-right">{{ s.totalVolume }} kg</td>
+                    </tr>
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

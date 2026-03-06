@@ -1,0 +1,55 @@
+<div class="modal-backdrop" (click)="cancel()"></div>
+
+<div class="modal" role="dialog" [attr.aria-label]="exercise ? 'Edit Exercise' : 'Add Exercise'">
+  <div class="modal__header">
+    <h2 class="modal__title">{{ exercise ? 'Edit Exercise' : 'Add Exercise' }}</h2>
+    <button class="modal__close" (click)="cancel()" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <form class="modal__body" (ngSubmit)="submit()">
+    <label class="field">
+      <span class="field__label">Name <span aria-hidden="true">*</span></span>
+      <input
+        class="field__input"
+        type="text"
+        [(ngModel)]="name"
+        name="name"
+        placeholder="e.g. Bench Press"
+        required
+        autocomplete="off"
+        autofocus
+      />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Muscle Group <span aria-hidden="true">*</span></span>
+      <select class="field__input field__input--select" [(ngModel)]="muscleGroup" name="muscleGroup">
+        @for (mg of muscleGroups; track mg) {
+          <option [value]="mg">{{ muscleGroupLabels[mg] }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Description</span>
+      <textarea
+        class="field__input field__input--textarea"
+        [(ngModel)]="description"
+        name="description"
+        placeholder="Optional notes about the exercise"
+        rows="3"
+      ></textarea>
+    </label>
+
+    <div class="modal__actions">
+      <button type="button" class="btn btn--ghost" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn btn--primary" [disabled]="!name.trim()">
+        {{ exercise ? 'Save Changes' : 'Add Exercise' }}
+      </button>
+    </div>
+  </form>
+</div>

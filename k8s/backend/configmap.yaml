@@ -1,0 +1,12 @@
+# Non-sensitive backend configuration.
+# Update FRONTEND_URL and GOOGLE_CALLBACK_URL to match your actual domain.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: workout-tracker
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  FRONTEND_URL: "http://localhost"
+  GOOGLE_CALLBACK_URL: "http://localhost/api/auth/google/callback"

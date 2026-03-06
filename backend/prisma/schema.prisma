@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  LEGS
+  GLUTES
+  CORE
+  FULL_BODY
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  googleId  String?  @unique
+  avatarUrl String?
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions         WorkoutSession[]
+  createdTemplates WorkoutTemplate[] @relation("TemplateCreator")
+}
+
+/// Master list of exercises. Admin-managed; optionally seeded from a public API.
+model Exercise {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String?
+  muscleGroup MuscleGroup
+  imageUrl    String?
+  isCustom    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  templateExercises TemplateExercise[]
+  sessionExercises  SessionExercise[]
+}
+
+/// A named workout plan (e.g. "Chest Day", "Back & Biceps").
+model WorkoutTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User               @relation("TemplateCreator", fields: [createdById], references: [id])
+  exercises TemplateExercise[]
+  sessions  WorkoutSession[]
+}
+
+/// An exercise entry within a template, with suggested defaults.
+model TemplateExercise {
+  id            String  @id @default(cuid())
+  templateId    String
+  exerciseId    String
+  order         Int
+  defaultSets   Int?
+  defaultReps   Int?
+  defaultWeight Float?
+
+  template WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exercise Exercise        @relation(fields: [exerciseId], references: [id])
+
+  @@unique([templateId, order])
+}
+
+/// A single workout session performed by a user.
+model WorkoutSession {
+  id          String    @id @default(cuid())
+  userId      String
+  templateId  String?
+  name        String
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  user      User             @relation(fields: [userId], references: [id])
+  template  WorkoutTemplate? @relation(fields: [templateId], references: [id])
+  exercises SessionExercise[]
+}
+
+/// An exercise performed during a session.
+model SessionExercise {
+  id         String  @id @default(cuid())
+  sessionId  String
+  exerciseId String
+  order      Int
+  notes      String?
+
+  session  WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise Exercise       @relation(fields: [exerciseId], references: [id])
+  sets     ExerciseSet[]
+
+  @@unique([sessionId, order])
+}
+
+/// An individual set logged within a session exercise.
+model ExerciseSet {
+  id                String   @id @default(cuid())
+  sessionExerciseId String
+  setNumber         Int
+  reps              Int
+  weightKg          Float
+  restSeconds       Int?
+  completedAt       DateTime @default(now())
+
+  sessionExercise SessionExercise @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionExerciseId, setNumber])
+}

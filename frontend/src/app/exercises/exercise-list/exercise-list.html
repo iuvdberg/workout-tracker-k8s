@@ -1,0 +1,96 @@
+<div class="exercises">
+  <div class="exercises__header">
+    <h1 class="exercises__title">Exercises</h1>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" (click)="openCreate()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Exercise
+      </button>
+    }
+  </div>
+
+  <div class="exercises__filters" role="group" aria-label="Filter by muscle group">
+    <button
+      class="filter-btn"
+      [class.filter-btn--active]="filterGroup() === null"
+      (click)="setFilter(null)"
+    >All</button>
+    @for (mg of muscleGroups; track mg) {
+      <button
+        class="filter-btn"
+        [class.filter-btn--active]="filterGroup() === mg"
+        (click)="setFilter(mg)"
+      >{{ muscleGroupLabels[mg] }}</button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="exercises__error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="exercises__loading">Loading exercises…</p>
+  } @else if (filtered().length === 0) {
+    <p class="exercises__empty">No exercises found.</p>
+  } @else {
+    <div class="exercise-table-wrap">
+      <table class="exercise-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Muscle Group</th>
+            <th>Description</th>
+            <th class="exercise-table__actions-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ex of filtered(); track ex.id) {
+            <tr>
+              <td class="exercise-table__name">
+                <a [routerLink]="['/exercises', ex.id]" class="exercise-link">{{ ex.name }}</a>
+              </td>
+              <td>
+                <span class="muscle-badge muscle-badge--{{ ex.muscleGroup.toLowerCase() }}">
+                  {{ muscleGroupLabels[ex.muscleGroup] }}
+                </span>
+              </td>
+              <td class="exercise-table__desc">{{ ex.description || '—' }}</td>
+              <td class="exercise-table__actions">
+                <a [routerLink]="['/exercises', ex.id]" class="icon-btn" aria-label="History for {{ ex.name }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                </a>
+                @if (auth.isAdmin()) {
+                  <button class="icon-btn" (click)="openEdit(ex)" aria-label="Edit {{ ex.name }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn icon-btn--danger" (click)="deleteExercise(ex)" aria-label="Delete {{ ex.name }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6"/><path d="M14 11v6"/>
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <app-exercise-form
+    [exercise]="editingExercise()"
+    (saved)="onSaved($event)"
+    (cancelled)="closeForm()"
+  />
+}

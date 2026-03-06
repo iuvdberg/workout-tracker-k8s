@@ -1,0 +1,199 @@
+@if (loading()) {
+  <div class="state-msg">Loading session…</div>
+} @else if (error() && !session()) {
+  <div class="state-msg state-msg--error">{{ error() }}</div>
+} @else if (session()) {
+  <div class="page-container">
+    <!-- Header -->
+    <div class="page-header">
+      <a routerLink="/sessions" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Sessions
+      </a>
+      <div class="session-meta">
+        <h1 class="session-name">{{ session()!.name }}</h1>
+        <span class="session-duration">{{ formatDuration(session()!.startedAt, session()!.completedAt) }}</span>
+        @if (session()!.completedAt) {
+          <span class="badge badge--done">Completed</span>
+        } @else {
+          <span class="badge badge--active">Active</span>
+        }
+      </div>
+      @if (!session()!.completedAt) {
+        <button class="btn btn--success" (click)="complete()" [disabled]="completing()">
+          @if (completing()) { Finishing… } @else { Finish Workout }
+        </button>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error-banner">{{ error() }}</p>
+    }
+
+    <!-- Notes -->
+    <div class="notes-section">
+      @if (editingNotes()) {
+        <textarea
+          class="notes-textarea"
+          [(ngModel)]="notesDraft"
+          placeholder="Add notes about this session…"
+          rows="3"
+          autofocus
+        ></textarea>
+        <div class="notes-actions">
+          <button class="btn btn--ghost btn--sm" (click)="editingNotes.set(false)">Cancel</button>
+          <button class="btn btn--primary btn--sm" (click)="saveNotes()">Save</button>
+        </div>
+      } @else if (session()!.notes) {
+        <div class="notes-display" (click)="!session()!.completedAt && openNotes()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          <p class="notes-text">{{ session()!.notes }}</p>
+          @if (!session()!.completedAt) {
+            <span class="notes-hint">Click to edit</span>
+          }
+        </div>
+      } @else if (!session()!.completedAt) {
+        <button class="notes-add-btn" (click)="openNotes()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add notes
+        </button>
+      }
+    </div>
+
+    <!-- Exercise cards -->
+    <div class="exercises">
+      @for (se of session()!.exercises; track se.id) {
+        <div class="exercise-card">
+          <div class="exercise-card__header">
+            <div>
+              <span class="exercise-card__name">{{ se.exercise.name }}</span>
+              <span class="exercise-card__muscle">{{ se.exercise.muscleGroup }}</span>
+            </div>
+            @if (!session()!.completedAt) {
+              <button class="icon-btn icon-btn--danger" (click)="removeExercise(se)" title="Remove exercise">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            }
+          </div>
+
+          <!-- Sets table -->
+          @if (se.sets.length > 0) {
+            <table class="sets-table">
+              <thead>
+                <tr>
+                  <th>Set</th>
+                  <th>Reps</th>
+                  <th>Weight (kg)</th>
+                  @if (!session()!.completedAt) { <th></th> }
+                </tr>
+              </thead>
+              <tbody>
+                @for (set of se.sets; track set.id) {
+                  <tr>
+                    <td>{{ set.setNumber }}</td>
+                    <td>{{ set.reps }}</td>
+                    <td>{{ set.weightKg }}</td>
+                    @if (!session()!.completedAt) {
+                      <td>
+                        <button class="icon-btn icon-btn--danger" (click)="removeSet(se, set.id)" title="Remove set">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="no-sets">No sets logged yet.</p>
+          }
+
+          <!-- Log set form -->
+          @if (!session()!.completedAt && drafts()[se.id]) {
+            @if (suggestedSet(se); as sug) {
+              <div class="last-hint">
+                <span class="last-hint__label">Last: {{ sug.reps }} × {{ sug.weightKg }} kg</span>
+                <button class="last-hint__btn" (click)="copyLast(se)">↑ Copy</button>
+              </div>
+            }
+            <div class="log-form">
+              <input
+                class="log-input"
+                type="number"
+                min="1"
+                placeholder="Reps"
+                [(ngModel)]="drafts()[se.id].reps"
+              />
+              <input
+                class="log-input"
+                type="number"
+                min="0"
+                step="0.5"
+                placeholder="kg"
+                [(ngModel)]="drafts()[se.id].weightKg"
+              />
+              <button
+                class="btn btn--primary btn--sm"
+                (click)="logSet(se)"
+                [disabled]="drafts()[se.id].reps === null || drafts()[se.id].weightKg === null"
+              >
+                + Log Set
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!session()!.completedAt) {
+        <button class="add-exercise-btn" (click)="openPicker()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Exercise
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<!-- Exercise picker overlay -->
+@if (showPicker()) {
+  <div class="picker-backdrop" (click)="showPicker.set(false)"></div>
+  <div class="picker" role="dialog" aria-label="Add exercise">
+    <div class="picker__header">
+      <h2 class="picker__title">Add Exercise</h2>
+      <button class="icon-btn" (click)="showPicker.set(false)" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <input
+      class="picker__search"
+      type="text"
+      placeholder="Search exercises…"
+      [(ngModel)]="pickerSearch"
+      autocomplete="off"
+    />
+    <ul class="picker__list">
+      @for (ex of filteredExercises(); track ex.id) {
+        <li class="picker__item" (click)="addExercise(ex.id)">
+          <span class="picker__item-name">{{ ex.name }}</span>
+          <span class="picker__item-muscle">{{ ex.muscleGroup }}</span>
+        </li>
+      } @empty {
+        <li class="picker__empty">No exercises found.</li>
+      }
+    </ul>
+  </div>
+}

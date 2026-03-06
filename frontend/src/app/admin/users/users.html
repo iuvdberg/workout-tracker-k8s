@@ -1,0 +1,73 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">Users</h1>
+  </div>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state-msg">Loading…</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th class="text-center">Sessions</th>
+            <th>Joined</th>
+            <th class="text-center">Role</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr [class.is-you]="isCurrentUser(user)">
+              <td>
+                <div class="user-cell">
+                  @if (user.avatarUrl) {
+                    <img [src]="user.avatarUrl" [alt]="user.name" class="avatar" referrerpolicy="no-referrer" />
+                  } @else {
+                    <div class="avatar avatar--placeholder">{{ user.name.charAt(0).toUpperCase() }}</div>
+                  }
+                  <span class="user-name">
+                    {{ user.name }}
+                    @if (isCurrentUser(user)) { <span class="you-badge">you</span> }
+                  </span>
+                </div>
+              </td>
+              <td class="text-muted">{{ user.email }}</td>
+              <td class="text-center">{{ user._count.sessions }}</td>
+              <td class="text-muted">{{ formatDate(user.createdAt) }}</td>
+              <td class="text-center">
+                <span class="role-badge" [class.role-badge--admin]="user.role === 'ADMIN'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="text-right">
+                @if (!isCurrentUser(user)) {
+                  <button
+                    class="role-btn"
+                    [class.role-btn--demote]="user.role === 'ADMIN'"
+                    (click)="toggleRole(user)"
+                    [disabled]="updating() === user.id"
+                  >
+                    @if (updating() === user.id) {
+                      Updating…
+                    } @else if (user.role === 'ADMIN') {
+                      Make Member
+                    } @else {
+                      Make Admin
+                    }
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

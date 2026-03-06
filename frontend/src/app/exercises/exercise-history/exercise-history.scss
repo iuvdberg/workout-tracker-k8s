@@ -1,0 +1,267 @@
+.state-msg {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+
+  &--error { color: var(--color-danger, #e53e3e); }
+}
+
+.page-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding-top: 0.25rem;
+  flex-shrink: 0;
+
+  &:hover { color: var(--text-primary); }
+}
+
+.exercise-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.exercise-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.exercise-muscle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+// ── Personal record card ─────────────────────────────────────────────────────
+.pr-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-secondary));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-color));
+  border-radius: 12px;
+
+  &__icon { font-size: 1.5rem; line-height: 1; }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  &__value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  &__date {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+}
+
+// ── Section ──────────────────────────────────────────────────────────────────
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.section-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+// ── Progress chart ───────────────────────────────────────────────────────────
+.progress-chart {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 90px 1fr 60px;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  &__track {
+    height: 10px;
+    background: color-mix(in srgb, var(--border-color) 80%, transparent);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    min-width: 4px;
+    transition: width 0.3s;
+  }
+
+  &__value {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+// ── History list ─────────────────────────────────────────────────────────────
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.history-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+
+    &:hover { background: color-mix(in srgb, var(--bg-primary) 50%, transparent); }
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__date {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  &__summary {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__maxweight { font-weight: 600; color: var(--accent); }
+
+  &__chevron {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+
+    &--open { transform: rotate(180deg); }
+  }
+}
+
+// ── Sets table ───────────────────────────────────────────────────────────────
+.sets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--border-color);
+
+  th, td {
+    padding: 0.5rem 1.25rem;
+    text-align: left;
+  }
+
+  th {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--bg-primary) 50%, transparent);
+  }
+
+  td { color: var(--text-primary); }
+
+  tbody tr + tr td { border-top: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent); }
+
+  &__total td {
+    border-top: 1px solid var(--border-color) !important;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.text-right { text-align: right !important; }
+.text-muted { color: var(--text-secondary); }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+
+  p { margin: 0; }
+}

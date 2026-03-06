@@ -1,0 +1,124 @@
+<div class="progress-page">
+  <h1 class="page-title">Progress</h1>
+
+  @if (loading()) {
+    <p class="state-msg">Loading…</p>
+  } @else if (error()) {
+    <p class="state-msg state-msg--error">{{ error() }}</p>
+  } @else if (stats()) {
+
+    <!-- Summary cards -->
+    <section class="section">
+      <div class="stat-cards">
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats()!.summary.totalSessions }}</span>
+          <span class="stat-card__label">Workouts</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats()!.summary.totalSets }}</span>
+          <span class="stat-card__label">Sets logged</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value">{{ formatVolume(stats()!.summary.totalVolumeKg) }}</span>
+          <span class="stat-card__label">Total volume</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Weekly activity -->
+    <section class="section">
+      <h2 class="section-title">Activity (last 12 weeks)</h2>
+      <div class="bar-chart bar-chart--weekly">
+        @for (w of stats()!.weeklyActivity; track w.week) {
+          <div class="bar-chart__col">
+            <div
+              class="bar-chart__bar"
+              [style.height.%]="w.count === 0 ? 4 : (w.count / maxWeekCount()) * 100"
+              [class.bar-chart__bar--empty]="w.count === 0"
+              [title]="w.count + ' workout' + (w.count !== 1 ? 's' : '')"
+            ></div>
+            <span class="bar-chart__label">{{ weekLabel(w.week) }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Personal records -->
+    @if (stats()!.personalRecords.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Personal Records</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Exercise</th>
+                <th class="text-right">Max weight</th>
+                <th class="text-right">Reps</th>
+                <th class="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (pr of stats()!.personalRecords; track pr.exerciseId) {
+                <tr>
+                  <td>{{ pr.exerciseName }}</td>
+                  <td class="text-right text-accent">{{ pr.maxWeightKg }} kg</td>
+                  <td class="text-right">{{ pr.reps }}</td>
+                  <td class="text-right text-muted">{{ weekLabel(pr.date) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- Top exercises by volume -->
+    @if (stats()!.topExercises.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Top Exercises by Volume</h2>
+        <div class="horiz-bars">
+          @for (ex of stats()!.topExercises; track ex.exerciseId) {
+            <div class="horiz-bar">
+              <span class="horiz-bar__label">{{ ex.exerciseName }}</span>
+              <div class="horiz-bar__track">
+                <div
+                  class="horiz-bar__fill"
+                  [style.width.%]="(ex.totalVolumeKg / maxExerciseVolume()) * 100"
+                ></div>
+              </div>
+              <span class="horiz-bar__value">{{ formatVolume(ex.totalVolumeKg) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Muscle group distribution -->
+    @if (stats()!.muscleGroups.length > 0) {
+      <section class="section">
+        <h2 class="section-title">Muscle Groups</h2>
+        <div class="horiz-bars">
+          @for (mg of stats()!.muscleGroups; track mg.group) {
+            <div class="horiz-bar">
+              <span class="horiz-bar__label">{{ muscleLabel(mg.group) }}</span>
+              <div class="horiz-bar__track">
+                <div
+                  class="horiz-bar__fill horiz-bar__fill--secondary"
+                  [style.width.%]="(mg.sets / maxMuscleSetCount()) * 100"
+                ></div>
+              </div>
+              <span class="horiz-bar__value">{{ mg.sets }} sets</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (stats()!.summary.totalSessions === 0) {
+      <div class="empty-state">
+        <p>No completed workouts yet. Log some sessions to see your progress!</p>
+      </div>
+    }
+
+  }
+</div>

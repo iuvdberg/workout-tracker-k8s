@@ -1,0 +1,46 @@
+<div class="page-container">
+  <div class="page-header">
+    <a routerLink="/sessions" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </a>
+    <h1 class="page-title">Start Workout</h1>
+  </div>
+
+  <div class="start-card">
+    @if (error()) {
+      <p class="error-msg">{{ error() }}</p>
+    }
+
+    <div class="field">
+      <label for="session-name" class="field__label">Session name</label>
+      <input
+        id="session-name"
+        class="field__input"
+        type="text"
+        [(ngModel)]="name"
+        placeholder="e.g. Push Day"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="field">
+      <label for="template" class="field__label">Start from template <span class="optional">(optional)</span></label>
+      <select id="template" class="field__select" [(ngModel)]="selectedTemplateId">
+        <option value="">— No template —</option>
+        @for (t of templates(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="start-actions">
+      <a routerLink="/sessions" class="btn btn--ghost">Cancel</a>
+      <button class="btn btn--primary" (click)="start()" [disabled]="!name.trim() || loading()">
+        @if (loading()) { Starting… } @else { Start Workout }
+      </button>
+    </div>
+  </div>
+</div>

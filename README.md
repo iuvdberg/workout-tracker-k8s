@@ -147,6 +147,47 @@ minikube ip   # e.g. 192.168.49.2
 # Then visit http://192.168.49.2
 ```
 
+## Stopping & Starting
+
+Kubernetes deployments run in the background — they don't stop when you close a terminal.
+
+### Stop the project (remove all resources)
+
+```bash
+kubectl delete namespace workout-tracker
+```
+
+This removes all pods, services, secrets, configmaps, and volumes in one command. You'll need to re-apply manifests to start again.
+
+### Start it again
+
+Re-apply the manifests (see [step 3](#3-apply-manifests) above). Docker images don't need to be rebuilt unless you changed source code.
+
+### What happens when you close Docker Desktop?
+
+The K8s cluster shuts down and all workloads stop. When you reopen Docker Desktop, Kubernetes starts back up and **your deployments resume automatically** — no need to re-apply manifests.
+
+## Useful Commands
+
+```bash
+# Check pod status
+kubectl get pods -n workout-tracker
+
+# View logs
+kubectl logs -n workout-tracker deploy/backend
+kubectl logs -n workout-tracker deploy/frontend
+kubectl logs -n workout-tracker deploy/postgres
+
+# View migration init container logs
+kubectl logs -n workout-tracker deploy/backend -c migrate
+
+# Restart a deployment (e.g. after rebuilding an image)
+kubectl rollout restart deployment/backend -n workout-tracker
+
+# Open a shell in a running pod
+kubectl exec -it deploy/backend -n workout-tracker -- sh
+```
+
 ## Updating
 
 After changing source code:

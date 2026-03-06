@@ -57,7 +57,7 @@ router.post('/', authenticate, adminOnly, async (req: AuthRequest, res: Response
 
 // GET /api/templates/:id — detail with exercises
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
   const template = await prisma.workoutTemplate.findUnique({
     where: { id },
     include: {
@@ -73,7 +73,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // PUT /api/templates/:id — full replace (admin)
 router.put('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
   const { name, description, exercises = [] } = req.body as {
     name?: string;
     description?: string;
@@ -122,7 +122,7 @@ router.put('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Respon
 
 // DELETE /api/templates/:id (admin)
 router.delete('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
   const existing = await prisma.workoutTemplate.findUnique({ where: { id } });
   if (!existing) {
     res.status(404).json({ error: 'Template not found' });

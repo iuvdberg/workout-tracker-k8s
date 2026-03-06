@@ -47,7 +47,7 @@ router.post('/', authenticate, adminOnly, async (req: AuthRequest, res: Response
 
 // PATCH /api/exercises/:id — update (admin only)
 router.patch('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
   const { name, muscleGroup, description } = req.body as {
     name?: string;
     muscleGroup?: string;
@@ -78,7 +78,7 @@ router.patch('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Resp
 
 // DELETE /api/exercises/:id — delete (admin only)
 router.delete('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
 
   const existing = await prisma.exercise.findUnique({ where: { id } });
   if (!existing) {

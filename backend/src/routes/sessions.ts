@@ -82,7 +82,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 
 // GET /api/sessions/:id — session detail with exercises and sets
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   const detail = await prisma.workoutSession.findUnique({
@@ -99,7 +99,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // PATCH /api/sessions/:id — update name/notes or mark complete
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   const { name, notes, complete } = req.body as {
@@ -127,7 +127,7 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/sessions/:id
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
   await prisma.workoutSession.delete({ where: { id: session.id } });
   res.status(204).send();
@@ -135,7 +135,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 // POST /api/sessions/:id/exercises — add an exercise to the session
 router.post('/:id/exercises', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   if (session.completedAt) {
@@ -164,18 +164,18 @@ router.post('/:id/exercises', authenticate, async (req: AuthRequest, res: Respon
 
 // DELETE /api/sessions/:id/exercises/:sessionExerciseId
 router.delete('/:id/exercises/:sessionExerciseId', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   await prisma.sessionExercise.deleteMany({
-    where: { id: req.params['sessionExerciseId'], sessionId: session.id },
+    where: { id: req.params['sessionExerciseId'] as string, sessionId: session.id },
   });
   res.status(204).send();
 });
 
 // POST /api/sessions/:id/exercises/:sessionExerciseId/sets — log a set
 router.post('/:id/exercises/:sessionExerciseId/sets', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   if (session.completedAt) {
@@ -190,7 +190,7 @@ router.post('/:id/exercises/:sessionExerciseId/sets', authenticate, async (req: 
   }
 
   const sessionExercise = await prisma.sessionExercise.findFirst({
-    where: { id: req.params['sessionExerciseId'], sessionId: session.id },
+    where: { id: req.params['sessionExerciseId'] as string, sessionId: session.id },
     include: { sets: true },
   });
   if (!sessionExercise) {
@@ -198,7 +198,7 @@ router.post('/:id/exercises/:sessionExerciseId/sets', authenticate, async (req: 
     return;
   }
 
-  const nextSetNumber = (sessionExercise.sets.length ?? 0) + 1;
+  const nextSetNumber = sessionExercise.sets.length + 1;
   const set = await prisma.exerciseSet.create({
     data: {
       sessionExerciseId: sessionExercise.id,
@@ -212,11 +212,11 @@ router.post('/:id/exercises/:sessionExerciseId/sets', authenticate, async (req: 
 
 // DELETE /api/sessions/:id/exercises/:sessionExerciseId/sets/:setId
 router.delete('/:id/exercises/:sessionExerciseId/sets/:setId', authenticate, async (req: AuthRequest, res: Response) => {
-  const session = await getOwnedSession(req.params['id'], req, res);
+  const session = await getOwnedSession(req.params['id'] as string, req, res);
   if (!session) return;
 
   await prisma.exerciseSet.deleteMany({
-    where: { id: req.params['setId'], sessionExercise: { sessionId: session.id } },
+    where: { id: req.params['setId'] as string, sessionExercise: { sessionId: session.id } },
   });
   res.status(204).send();
 });

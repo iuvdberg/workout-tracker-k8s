@@ -24,7 +24,7 @@ router.get('/', authenticate, adminOnly, async (_req: AuthRequest, res: Response
 
 // PATCH /api/users/:id — update role (admin only, cannot demote yourself)
 router.patch('/:id', authenticate, adminOnly, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
+  const id = req.params['id'] as string;
   const { role } = req.body as { role?: string };
 
   if (role !== 'ADMIN' && role !== 'MEMBER') {
